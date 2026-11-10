@@ -1,8 +1,5 @@
-function formatFileSize(size) {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
+import DownloadButton from './DownloadButton.jsx';
+import { formatFileSize } from '../utils/files.js';
 
 function formatDate(value) {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -11,7 +8,7 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
-export default function DocumentList({ documents, isLoading, downloadingId, onDownload }) {
+export default function DocumentList({ documents, isLoading, onDownload }) {
   if (isLoading) return <p className="list-state">Carregando documentos...</p>;
   if (!documents.length) {
     return (
@@ -43,15 +40,7 @@ export default function DocumentList({ documents, isLoading, downloadingId, onDo
               <td data-label="Enviado em">{formatDate(document.uploadedAt)}</td>
               <td data-label="Tamanho">{formatFileSize(document.size)}</td>
               <td className="document-action">
-                <button
-                  className="download-button"
-                  type="button"
-                  onClick={() => onDownload(document)}
-                  disabled={downloadingId === document.id}
-                  aria-label={`Baixar ${document.originalName}`}
-                >
-                  {downloadingId === document.id ? 'Baixando...' : 'Baixar'}
-                </button>
+                <DownloadButton document={document} onDownload={onDownload} />
               </td>
             </tr>
           ))}

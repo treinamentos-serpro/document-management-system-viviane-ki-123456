@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import DocumentList from './components/DocumentList.jsx';
-import DocumentUpload from './components/DocumentUpload.jsx';
-import { downloadDocument, listDocuments, uploadDocument } from './services/documentService.js';
+import UploadComponent from './components/UploadComponent.jsx';
+import { downloadDocument, listDocuments, uploadDocument } from './services/apiClient.js';
+import { saveBlobAsFile } from './utils/files.js';
 import './App.css';
 
 const DEFAULT_USER_ID = 'usuario-demo';
@@ -16,10 +17,6 @@ export default function App() {
   const [documents, setDocuments] = useState([]);
   const [loadError, setLoadError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState('');
-  const [uploadError, setUploadError] = useState('');
-  const [downloadingId, setDownloadingId] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -52,30 +49,16 @@ export default function App() {
   }
 
   async function handleUpload(file) {
-    setIsUploading(true);
-    setUploadError('');
-    setUploadMessage('');
-    try {
-      await uploadDocument(userId, file);
-      setUploadMessage('Documento enviado.');
-      setRefreshKey((value) => value + 1);
-    } catch (error) {
-      setUploadError(error.message);
-      throw error;
-    } finally {
-      setIsUploading(false);
-    }
+    await uploadDocument(userId, file);
+    setRefreshKey((value) => value + 1);
   }
 
   async function handleDownload(document) {
-    setDownloadingId(document.id);
     setLoadError('');
     try {
-      await downloadDocument(userId, document);
+      saveBlobAsFile(await downloadDocument(userId, document), document.originalName);
     } catch (error) {
       setLoadError(error.message);
-    } finally {
-      setDownloadingId('');
     }
   }
 
@@ -110,12 +93,7 @@ export default function App() {
           <p className="storage-note"><span className="status-dot" /> Armazenamento local</p>
         </section>
 
-        <DocumentUpload
-          onUpload={handleUpload}
-          isUploading={isUploading}
-          successMessage={uploadMessage}
-          errorMessage={uploadError}
-        />
+        <UploadComponent onUpload={handleUpload} />
 
         <section className="documents-section" aria-labelledby="documents-title">
           <div className="section-heading">
@@ -131,7 +109,6 @@ export default function App() {
           <DocumentList
             documents={documents}
             isLoading={isLoading}
-            downloadingId={downloadingId}
             onDownload={handleDownload}
           />
         </section>

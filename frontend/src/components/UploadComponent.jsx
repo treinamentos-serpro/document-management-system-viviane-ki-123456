@@ -1,24 +1,27 @@
 import { useState } from 'react';
+import { formatFileSize } from '../utils/files.js';
 
-function formatFileSize(size) {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-export default function DocumentUpload({ onUpload, isUploading, successMessage, errorMessage }) {
+export default function UploadComponent({ onUpload }) {
   const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
 
   async function submitUpload(event) {
     event.preventDefault();
     if (!file || isUploading) return;
+
     const form = event.currentTarget;
+    setIsUploading(true);
+    setFeedback({ type: '', message: '' });
     try {
       await onUpload(file);
+      setFeedback({ type: 'success', message: 'Documento enviado.' });
       setFile(null);
       form.reset();
-    } catch {
-      // A mensagem detalhada é exibida pelo componente pai.
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.message });
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -43,8 +46,8 @@ export default function DocumentUpload({ onUpload, isUploading, successMessage, 
         {isUploading ? 'Enviando...' : 'Enviar documento'}
       </button>
       <div className="upload-feedback" id="upload-feedback" aria-live="polite">
-        {errorMessage && <span className="feedback-error" role="alert">{errorMessage}</span>}
-        {successMessage && !errorMessage && <span className="feedback-success">{successMessage}</span>}
+        {feedback.type === 'error' && <span className="feedback-error" role="alert">{feedback.message}</span>}
+        {feedback.type === 'success' && <span className="feedback-success">{feedback.message}</span>}
       </div>
     </form>
   );
