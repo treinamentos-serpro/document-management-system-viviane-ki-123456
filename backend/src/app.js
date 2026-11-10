@@ -1,15 +1,15 @@
 const express = require('express');
 const config = require('./config');
-const createDocumentRepository = require('./repositories/documentRepository');
-const createDocumentService = require('./services/documentService');
-const createDocumentController = require('./controllers/documentController');
-const createDocumentRoutes = require('./routes/documentRoutes');
+const createDocumentsRepository = require('./repositories/documents.repository');
+const createDocumentsService = require('./services/documents.service');
+const createDocumentsController = require('./controllers/documents.controller');
+const createDocumentsRoutes = require('./routes/documents.routes');
 const createUploadMiddleware = require('./middleware/uploadMiddleware');
 
 const app = express();
-const documentRepository = createDocumentRepository({ storageDir: config.storageDir });
-const documentService = createDocumentService({ documentRepository });
-const documentController = createDocumentController({ documentService });
+const documentsRepository = createDocumentsRepository({ storageDir: config.storageDir });
+const documentsService = createDocumentsService({ documentsRepository });
+const documentsController = createDocumentsController({ documentsService });
 const uploadMiddleware = createUploadMiddleware({
   storageDir: config.storageDir,
   maxFileSizeBytes: config.maxFileSizeBytes,
@@ -20,7 +20,7 @@ app.use(express.json());
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
-app.use(createDocumentRoutes({ documentController, uploadMiddleware }));
+app.use(createDocumentsRoutes({ documentsController, uploadMiddleware }));
 app.use((req, res) => {
   res.status(404).json({
     error: { code: 'NOT_FOUND', message: 'Recurso não encontrado.' },

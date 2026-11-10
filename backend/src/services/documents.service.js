@@ -1,6 +1,6 @@
 const crypto = require('node:crypto');
 
-function createDocumentService({ documentRepository }) {
+function createDocumentsService({ documentsRepository }) {
   return {
     createDocument({ file, owner }) {
       const document = {
@@ -13,10 +13,10 @@ function createDocumentService({ documentRepository }) {
       };
 
       try {
-        return documentRepository.save(document, file.filename);
+        return documentsRepository.save(document, file.filename);
       } catch (error) {
         try {
-          documentRepository.removeFile(file.path);
+          documentsRepository.removeFile(file.path);
         } catch (cleanupError) {
           console.error('Não foi possível remover um upload sem metadados:', cleanupError);
         }
@@ -25,13 +25,13 @@ function createDocumentService({ documentRepository }) {
     },
 
     listDocuments(owner) {
-      return documentRepository.listByOwner(owner);
+      return documentsRepository.listByOwner(owner);
     },
 
     getDownload(owner, id) {
-      return documentRepository.findFileByIdAndOwner(id, owner);
+      return documentsRepository.findFileByIdAndOwner(id, owner);
     },
   };
 }
 
-module.exports = createDocumentService;
+module.exports = createDocumentsService;

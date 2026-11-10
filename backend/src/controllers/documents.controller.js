@@ -1,4 +1,4 @@
-function createDocumentController({ documentService }) {
+function createDocumentsController({ documentsService }) {
   return {
     upload(req, res, next) {
       if (!req.file) {
@@ -8,7 +8,7 @@ function createDocumentController({ documentService }) {
       }
 
       try {
-        const document = documentService.createDocument({ file: req.file, owner: req.ownerId });
+        const document = documentsService.createDocument({ file: req.file, owner: req.ownerId });
         return res.status(201).json(document);
       } catch (error) {
         return next(error);
@@ -17,7 +17,7 @@ function createDocumentController({ documentService }) {
 
     list(req, res, next) {
       try {
-        return res.json(documentService.listDocuments(req.ownerId));
+        return res.json(documentsService.listDocuments(req.ownerId));
       } catch (error) {
         return next(error);
       }
@@ -25,7 +25,7 @@ function createDocumentController({ documentService }) {
 
     download(req, res, next) {
       try {
-        const document = documentService.getDownload(req.ownerId, req.params.id);
+        const document = documentsService.getDownload(req.ownerId, req.params.id);
         if (!document) {
           return res.status(404).json({
             error: { code: 'DOCUMENT_NOT_FOUND', message: 'Documento não encontrado.' },
@@ -44,4 +44,4 @@ function createDocumentController({ documentService }) {
   };
 }
 
-module.exports = createDocumentController;
+module.exports = createDocumentsController;
